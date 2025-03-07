@@ -1,59 +1,70 @@
-# Fake and Real News Dataset Analysis
+# Fake News Detection
 
-This repository contains a Jupyter Notebook (`main.ipynb`) that downloads and explores the [Fake and Real News dataset](https://www.kaggle.com/clmentbisaillon/fake-and-real-news-dataset) from Kaggle. The notebook demonstrates how to install dependencies, download the dataset using `kagglehub`, load the data with pandas, and perform basic exploratory data analysis.
+This repository contains a Jupyter Notebook for analyzing and processing a fake news dataset. The dataset is downloaded from Kaggle and processed using Python libraries such as Pandas, Transformers, and Torchmetrics.
 
-## Overview
-
-The notebook performs the following tasks:
-- **Install Required Packages:** Uses `pip` to install necessary libraries such as `torchmetrics`, `datasets`, `transformers`, and `kagglehub`.
-- **Download the Dataset:** Leverages `kagglehub.dataset_download` to download the latest version of the dataset.
-- **Data Loading:** Reads the `Fake.csv` and `True.csv` files into pandas DataFrames.
-- **Exploratory Analysis:** Prints out samples, displays DataFrame information, and summarizes the dataset using pandas functions like `head()`, `describe()`, and `info()`.
-
-## Prerequisites
-
-- **Python 3.x**
-- **Jupyter Notebook Environment:** This notebook can be run locally or on platforms like Google Colab.
-- **Internet Connection:** Required for downloading the dataset from Kaggle via `kagglehub`.
+## Dataset
+The dataset is obtained from Kaggle's [Fake and Real News Dataset](https://www.kaggle.com/clmentbisaillon/fake-and-real-news-dataset). It consists of two CSV files:
+- `Fake.csv`: Contains fake news articles.
+- `True.csv`: Contains real news articles.
 
 ## Installation
-
-The notebook automatically installs the required dependencies. However, if you prefer to install them manually, run the following command in your terminal or notebook cell:
+To run the notebook, install the required dependencies using the following command:
 
 ```bash
-pip install torchmetrics datasets transformers kagglehub
+pip install torchmetrics datasets transformers kagglehub pandas
 ```
 
-## Running the Notebook
+## Usage
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/yourusername/fake-news-detection.git
+   cd fake-news-detection
+   ```
+2. Run the Jupyter Notebook:
+   ```bash
+   jupyter notebook main.ipynb
+   ```
 
-1. **Open the Notebook:** Launch Jupyter Notebook or open the file in Google Colab.
-2. **Run the Cells:** Execute the notebook cells in order. The notebook will:
-   - Install necessary packages.
-   - Download the dataset from Kaggle.
-   - Load the dataset into pandas DataFrames.
-   - Display initial exploration of the data.
-3. **Explore and Extend:** Use the provided analysis as a starting point for further exploration or to build machine learning models.
+## Notebook Overview
+- Downloads the dataset from Kaggle.
+- Loads and inspects the dataset using Pandas.
+- Combines the fake and real news datasets and assigns labels (0 for real, 1 for fake).
+- Fine-tunes a BERT model using the `transformers` library for fake news classification.
 
-## Dataset Description
+## Fine-Tuning with Transformers
+The notebook uses the `transformers` library to fine-tune a `BERT` model for sequence classification:
 
-The [Fake and Real News dataset](https://www.kaggle.com/clmentbisaillon/fake-and-real-news-dataset) is composed of two CSV files:
+1. **Loading the Pretrained Model and Tokenizer:**
+   ```python
+   from transformers import AutoModelForSequenceClassification
+   from transformers import AutoTokenizer, DataCollatorWithPadding
 
-- **Fake.csv:** Contains fake news articles.
-- **True.csv:** Contains real news articles.
+   checkpoint = "bert-base-uncased"
+   tokenizer = AutoTokenizer.from_pretrained(checkpoint)
 
-Each file includes the following columns:
-- **title:** The title of the news article.
-- **text:** The full text of the article.
-- **subject:** The category or subject of the article.
-- **date:** The publication date of the article.
+   model = AutoModelForSequenceClassification.from_pretrained(checkpoint, num_labels=2)
+   ```
+2. **Setting Up the Optimizer:**
+   ```python
+   from transformers import AdamW
 
-The notebook uses this dataset to perform a preliminary analysis and can be expanded for tasks like text classification, sentiment analysis, or other forms of data mining.
+   optimizer = AdamW(model.parameters(), lr=1e-5)
+   ```
+3. **Learning Rate Scheduler:**
+   ```python
+   from transformers import get_scheduler
+
+   num_epochs = 1
+   num_training_steps = num_epochs * len(train_dataloader)
+   lr_scheduler = get_scheduler(
+       "linear",
+       optimizer=optimizer,
+       num_warmup_steps=0,
+       num_training_steps=num_training_steps,
+   )
+   print(num_training_steps)
+   ```
 
 ## License
+This project is licensed under the MIT License.
 
-*Include your license information here if applicable.*
-
-## Acknowledgments
-
-- Thanks to [Kaggle](https://www.kaggle.com/) and the dataset creator, Clément Bisaillon, for providing the Fake and Real News dataset.
-- Thanks to the developers of `kagglehub` for streamlining the dataset download process.
